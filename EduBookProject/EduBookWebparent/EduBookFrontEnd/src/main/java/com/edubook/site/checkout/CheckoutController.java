@@ -1,0 +1,90 @@
+package com.edubook.site.checkout;
+
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+
+import com.edubook.common.entity.Account;
+import com.edubook.common.entity.Address;
+import com.edubook.common.entity.PaymentMethod;
+import com.edubook.common.entity.ShoppingCart;
+import com.edubook.site.address.AddressService;
+import com.edubook.site.customer.CustomerService;
+import com.edubook.site.order.OrderService;
+import com.edubook.site.setting.PaymentSettingBag;
+import com.edubook.site.setting.SettingService;
+import com.edubook.site.shoppingcart.ShoppingCartService;
+
+@Controller
+public class CheckoutController {
+
+	@Autowired
+	private CheckoutService checkoutService;
+	@Autowired
+	private CustomerService customerService;
+	@Autowired
+	private AddressService addressService;
+	@Autowired
+	private ShoppingCartService cartService;
+	@Autowired
+	private OrderService orderService;
+	//@Autowired
+	//private SettingService settingService;
+	
+	@GetMapping("/checkout")
+	public String viewCheckoutPage(Model model, HttpServletRequest request) {
+		Account account = getAuthenticatedAccount(request);
+		List<ShoppingCart> cartItems = cartService.listCartItems(account);
+		
+		Address defaultAddress = addressService.getDefaultAddress(account);
+		if(defaultAddress != null) {
+			model.addAttribute("defaultAddress", defaultAddress);
+		}
+		
+		CheckoutInfo checkoutInfo = checkoutService.prepareCheckout(cartItems);
+		//PaymentSettingBag paymentSettings = settingService.getPaymentSetting();
+		String paypalClientID = "AaGh_RHeZi2nG-_mPoRbOzO0nSx4O5hWgtlrhWbLxq57cbNmetqKGyI54szeanhMALF-gyc01o47hzKP";
+		
+		model.addAttribute("paypalClientID", paypalClientID);
+		model.addAttribute("account", account);
+		model.addAttribute("cartItems", cartItems);
+		model.addAttribute("checkoutInfo", checkoutInfo);
+		return "checkout/checkout";
+	}
+	
+	private Account getAuthenticatedAccount(HttpServletRequest request) {
+		String customerName = getUsernameOfAuthenticatedCustomer(request);
+		Account account = customerService.getAccountByUsername(customerName);
+		String customerEmail = account.getEmail();
+		return customerService.getAccountByEmail(customerEmail);
+	}
+	
+	public static String getUsernameOfAuthenticatedCustomer(HttpServletRequest request) {
+	    Object principal = request.getUserPrincipal();
+	    String customerName = null;
+	    if (principal instanceof UsernamePasswordAuthenticationToken) {
+	        customerName = request.getUserPrincipal().getName();
+	    }
+	    return customerName;
+	}
+	
+	@PostMapping("/place-order")
+	public String placeOrder(HttpServletRequest request) {
+		String paymentType = request.getParameter("paymentMethod");
+		PaymentMethod paymentMethod = PaymentMethod.valueOf(paymentType);	
+		Account account = getAuthenticatedAccount(request);
+		List<ShoppingCart> cartItems = cartService.listCartItems(account);
+		Address defaultAddress = addressService.getDefaultAddress(account);
+		CheckoutInfo checkoutInfo = checkoutService.prepareCheckout(cartItems);
+		orderService.createOrder(account, defaultAddress, cartItems, paymentMethod, checkoutInfo);
+		cartService.deleteByCustomer(account);
+		return "checkout/order_completed";
+	}
+}

@@ -1,0 +1,38 @@
+package com.edubook.admin.request;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class RequestRestController {
+
+	@Autowired
+	private RequestService service;
+	
+	@PostMapping("/request-update-{IDrequest}-{status}")
+	public void 
+	
+class Response{
+		private Integer IDrequest;
+		private String status;
+		
+		public Response(Integer iDrequest, String status) {
+			this.IDrequest = iDrequest;
+			this.status = status;
+		}
+		public Integer getIDrequest() {
+			return IDrequest;
+		}
+		public void setIDrequest(Integer iDrequest) {
+			IDrequest = iDrequest;
+		}
+		public String getStatus() {
+			return status;
+		}
+		public void setStatus(String status) {
+			this.status = status;
+		}
+		
+	}
+}

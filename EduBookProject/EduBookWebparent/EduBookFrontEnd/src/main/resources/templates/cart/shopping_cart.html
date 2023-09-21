@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html xmlns:th="www.thymeleaf.org"
+	xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduBook - Giỏ hàng</title>
+<script th:src="@{js/jquery-3.3.1.js}"></script>
+<script th:src="@{js/bootstrap.min.js}"></script>
+<script
+	th:src="@{https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js}"></script>
+<link rel="stylesheet"
+	th:href="@{https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css}">
+<link rel="stylesheet" th:href="@{css/bootstrap.min.css}">
+<link
+	th:href="@{https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500&display=swap}"
+	rel="stylesheet">
+<link rel="stylesheet" th:href="@{fontawesome/all.min.css}">
+<link rel="stylesheet" th:href="@{css/style.css}">
+<link rel="stylesheet" th:href="@{css/cart.css}">
+</head>
+<body>
+	<!-- header -->
+	<header id="header">
+		<!-- header top -->
+		<div class="header__top">
+			<div class="container">
+				<section class="row flex">
+					<div class="col-lg-5 col-md-0 col-sm-0 heade__top-left">
+						<span>EduBook - Cội nguồn của tri thức</span>
+					</div>
+
+					<nav class="col-lg-7 col-md-0 col-sm-0 header__top-right">
+						<ul class="header__top-list" sec:authorize="!isAuthenticated()">
+							<li class="header__top-item"><a th:href="@{/register}"
+								class="header__top-link">Đăng ký</a></li>
+							<li class="header__top-item"><a th:href="@{/login}"
+								class="header__top-link">Đăng nhập</a></li>
+						</ul>
+						<ul class="header__top-list" sec:authorize="isAuthenticated()">
+							<li class="header__top-item"><a
+								th:href="@{/customer-update}" class="header__top-link"
+								sec:authentication="principal.hoten"></a></li>
+						</ul>
+					</nav>
+				</section>
+			</div>
+		</div>
+		<!--end header top -->
+
+		<div class="header__bottom">
+			<div class="container">
+				<section class="row">
+					<div class="col-lg-3 col-md-4 col-sm-12 header__logo">
+						<h1 class="header__heading">
+							<a href="#" class="header__logo-link"> <img
+								th:src="@{image/logo1.png}" alt="Logo" class="header__logo-img">
+							</a>
+						</h1>
+					</div>
+
+					<div class="col-lg-6 col-md-7 col-sm-0 header__search">
+						<form class="col-lg-12 col-md-7 col-sm-0 header__search"
+							th:action="@{/search}">
+							<input type="search" name="keyword" class="header__search-input"
+								th:value="${keyword}" placeholder="Tìm kiếm...">
+						</form>
+					</div>
+
+					<a href="cart.html" class="col-lg-1 col-md-1 col-sm-0 header__cart">
+						<div class="header__cart-icon-wrap" style="padding-top: 35px">
+							<a th:href="@{/cart}"> <svg
+									xmlns="http://www.w3.org/2000/svg" width="30" height="30"
+									style="color: white" viewBox="0 0 24 24" fill="none"
+									stroke="currentColor" stroke-width="2" stroke-linecap="round"
+									stroke-linejoin="round" class="feather feather-shopping-cart"
+									id="IconChangeColor">
+									<circle cx="9" cy="21" r="1"></circle>
+									<circle cx="20" cy="21" r="1"></circle>
+									<path
+										d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"
+										id="mainIconPathAttribute"></path></svg>
+							</a>
+						</div>
+					</a>
+				</section>
+			</div>
+		</div>
+		<!--end header bottom -->
+
+		<!-- header nav -->
+		<div class="header__nav">
+			<div class="container">
+				<section class="row">
+					<th:block sec:authorize="isAuthenticated()">
+						<div class="header__nav col-lg-9 col-md-0 col-sm-0">
+							<ul class="header__nav-list">
+								<li class="header__nav-item"><a
+									th:href="@{/customer-update}" class="header__nav-link">Thông
+										tin tài khoản</a></li>
+								<li class="header__nav-item"><a th:href="@{/order}"
+									class="header__nav-link">Đơn hàng</a></li>
+								<li class="header__nav-item"><a th:href="@{/address_book}"
+									class="header__nav-link">Địa chỉ</a></li>
+								</li>
+								<li class="header__nav-item"><a th:href="@{/review}"
+									class="header__nav-link">Đánh giá</a></li>
+								</li>
+								<li class="header__nav-item"><a th:href="@{/request}"
+									class="header__nav-link">Khiếu nại</a></li>
+								<li class="header__nav-item"><a id="logoutLink" href=""
+									class="header__nav-link">Đăng xuất</a></li>
+
+							</ul>
+						</div>
+					</th:block>
+				</section>
+			</div>
+		</div>
+	</header>
+
+	<section class="cart">
+		<div class="container">
+			<article class="row cart__head pc">
+				<nav class="menu__nav col-lg-3 col-md-12 col-sm-0">
+					<ul class="menu__list">
+						<li class="menu__item menu__item--active"><a href="#"
+							class="menu__link"> <img src="images1/item/baby-boy.png"
+								alt="" class="menu__item-icon" id="Capa_1"
+								enable-background="new 0 0 512 512" height="512"
+								viewBox="0 0 512 512" width="512"> Sách Tiếng Việt
+						</a></li>
+						<li class="menu__item"><a href="#" class="menu__link"> <img
+								src="images1/item/translation.png" alt=""
+								class="menu__item-icon" id="Capa_1"
+								enable-background="new 0 0 512 512" height="512"
+								viewBox="0 0 512 512" width="512"> Sách nước ngoài
+						</a></li>
+
+						<li class="menu__item"><a href="#" class="menu__link"> <img
+								src="images1/item/1380754_batman_comic_hero_superhero_icon.png"
+								alt="" class="menu__item-icon" viewBox="0 0 512 512"
+								width="1012" height="512"> Manga - Comic
+						</a></li>
+
+					</ul>
+				</nav>
+				<div class="col-6 cart__head-name"
+					th:unless="${#lists.isEmpty(cartItems)}">Thông tin sản phẩm</div>
+				<div class="col-3 cart__head-quantity"
+					th:unless="${#lists.isEmpty(cartItems)}">Số lượng</div>
+				<div class="col-3 cart__head-price"
+					th:unless="${#lists.isEmpty(cartItems)}">Đơn giá</div>
+			</article>
+			<th:block th:each="item, status : ${cartItems}">
+				<article class="row cart__body" th:id="'row' + ${status.count}">
+					<div class="col-6 cart__body-name">
+						<div class="cart__body-name-img">
+							<img th:if="${item.book.hinhanh == null}"
+								th:src="@{/image/id467907-125.png}"> <img
+								th:if="${item.book.hinhanh != null}"
+								th:src="@{${item.book.bookPhotoPath}}">
+						</div>
+						<a th:href="@{'/book-detail-' + ${item.book.IDsach}}"
+							class="cart__body-name-title"> [[${item.book.tensach}]] </a>
+					</div>
+					<div class="col-3 cart__body-quantity">
+						<input type="button" value="-" class="cart__body-quantity-minus"
+							th:pid="${item.book.IDsach}"> <input type="number"
+							min="1" th:max="${item.book.soluongkho}" th:value="${item.quantity}"
+							class="cart__body-quantity-total"
+							th:id="'quantity' + ${item.book.IDsach}"> <input
+							type="button" value="+" class="cart__body-quantity-plus"
+							th:pid="${item.book.IDsach}">
+					</div>
+					<div class="col-3 cart__body-price">
+						<span>[[${item.book.dongia}]] đ</span> <a class="linkRemove"
+							th:rowNumber="${status.count}"
+							th:href="@{'/cart-remove-' + ${item.book.IDsach}}">Xóa</a> <span
+							th:id="'subTotal' + ${item.book.IDsach}" th:hidden="true"
+							class="subtotal">[[${item.subTotal}]]</span>
+					</div>
+				</article>
+			</th:block>
+
+			<article class="row cart__foot"
+				th:unless="${#lists.isEmpty(cartItems)}">
+				<p class="col-3 col-lg-3 col-sm-3 cart__foot-total">Tổng cộng:</p>
+				<span class="col-3 col-lg-3 col-sm-3 cart__foot-price" id="total">
+					[[${Total}]] đ </span> <br>
+				<form th:action="@{/checkout}">
+					<button type="submit" style="width: 700px;"
+						class="col-3 col-lg-3 col-sm-3 cart__foot-price-btn">Mua
+						hàng</button>
+				</form>
+			</article>
+		</div>
+	</section>
+
+	<footer>
+		<section class="footer__top">
+			<div class="container">
+				<div class="row">
+					<article class="footer__top-intro col-lg-5 col-md-4 col-sm-6">
+						<h4 class="footer__top-intro-heading">Về chúng tôi</h4>
+						<div class="footer__top-intro-content">
+							Edubook là cửa hàng luôn cung cấp cho các bạn tìm tòi tri thức,
+							đam mê đọc sách trên khắp cả nước.Chúng tôi sẽ liên tục cập nhật
+							những cuốn sách hay nhất, mới nhất, chất lượng nhất giúp người
+							đọc có những cuốn sách hay nhất để đọc! <br> <br> Điện
+							thoại: 0312 456 789 <br> Email: edubook@gmail.com <br>
+							Zalo: 0312 456 789 <br>
+						</div>
+					</article>
+
+					<article class="footer__top-policy col-lg-3 col-md-4 col-sm-6">
+						<h4 class="footer__top-policy-heading">Chính sách mua hàng</h4>
+
+						<ul class="footer__top-policy-list">
+							<li class="footer__top-policy-item"><a href="#"
+								class="footer__top-policy-link">Hình thức đặt hàng</a></li>
+							<li class="footer__top-policy-item"><a href="#"
+								class="footer__top-policy-link">Hình thức thanh toán</a></li>
+							<li class="footer__top-policy-item"><a href="#"
+								class="footer__top-policy-link">Phương thức vận chuyển</a></li>
+							<li class="footer__top-policy-item"><a href="#"
+								class="footer__top-policy-link">Chính sách đổi trả</a></li>
+							<li class="footer__top-policy-item"><a href="#"
+								class="footer__top-policy-link">Hướng dẫn sử dụng</a></li>
+						</ul>
+					</article>
+
+					<article
+						class="footer__top-contact-wrap col-lg-4 col-md-4 col-sm-6">
+						<h4 class="footer__top-contact-heading">Hotline liên hệ</h4>
+
+						<div class="footer__top-contact">
+							<div class="footer__top-contact-icon">
+								<img th:src="@{image/phone_top.png}"
+									class="footer__top-contact-img">
+							</div>
+
+							<div class="footer__top-contact-phone-wrap">
+								<div class="footer__top-contact-phone">0312 456 789</div>
+								<div class="footer__top-contact-des">(Giải đáp thắc mắc
+									24/24)</div>
+							</div>
+						</div>
+
+						<h4 class="footer__top-contact-heading">Kết nối với chúng tôi
+						</h4>
+
+						<div class="footer__top-contact-social">
+							<a href="#" class="footer__top-contact-social-link"> <img
+								th:src="@{image/facebook.png}">
+							</a> <a href="#" class="footer__top-contact-social-link"> <img
+								th:src="@{image/youtube.png}">
+							</a> <a href="#" class="footer__top-contact-social-link"> <img
+								th:src="@{image/tiktok.png}">
+							</a> <a href="#" class="footer__top-contact-social-link"> <img
+								th:src="@{image/zalo.png}">
+							</a>
+						</div>
+					</article>
+				</div>
+			</div>
+		</section>
+	</footer>
+
+	<script th:src="@{js/jq.js}"></script>
+	<script th:src="@{js/index.js}"></script>
+	<script type="text/javascript">
+    	contextPath = "[[@{/}]]"
+		var csrfHeaderName = "[[${_csrf.headerName}]]"
+		var csrfValue = "[[${_csrf.token}]]"
+    	
+    	$(document).ready(function(){
+		    $(".cart__body-quantity-minus").on("click", function(e){
+		        e.preventDefault()
+		        subtractQty($(this))
+		    })
+		
+		    $(".cart__body-quantity-plus").on("click", function(e){
+		        e.preventDefault()
+		        addQty($(this))
+		    })
+		    
+		    $(".linkRemove").on("click", function(e){
+		    	e.preventDefault()
+		    	remove($(this)) 	
+		    })
+		})
+    
+    	function subtractQty(btn){
+		    IDsach = btn.attr("pid")
+		    quantityInput = $("#quantity" + IDsach)
+		    newQuantity = parseInt(quantityInput.val()) - 1
+		    if(newQuantity > 0){
+		        quantityInput.val(newQuantity)
+		        updateQuantity(IDsach, newQuantity)
+		    }
+		    else{
+		        
+		    }
+		}
+    	
+    	function addQty(btn){
+		    IDsach = btn.attr("pid")
+		    quantityInput = $("#quantity" + IDsach)
+		    newQuantity = parseInt(quantityInput.val()) + 1
+		    if(newQuantity <= quantityInput.attr("max")){
+		        quantityInput.val(newQuantity)
+		        updateQuantity(IDsach, newQuantity)
+		    }
+		    else{
+		        
+		    }
+		}
+		
+		function updateQuantity(IDsach, quantity){
+			url= contextPath + "cart-update-" + IDsach + "-" + quantity
+			$.ajax({
+				type: "POST",
+				url: url,
+				beforeSend: function(xhr) {
+				xhr.setRequestHeader (csrfHeaderName, csrfValue)
+				}
+			}).done(function (updatedsubTotal) {
+				updatesubTotal(updatedsubTotal, IDsach)
+				updateTotal()
+			})
+		}
+		
+		function updatesubTotal(updatedsubTotal, IDsach){
+			$("#subTotal" + IDsach).text(updatedsubTotal)
+		}
+		
+		function updateTotal(){
+			var total = 0
+			var bookCount = 0
+			$(".subtotal").each(function(index, element){
+				bookCount++
+				total += parseInt(element.innerHTML)
+			})
+			$("#total").text(total + " đ")
+		}
+		
+		function showModalDialog(title, message){
+		  	$("#modalTitle").text(title)
+		  	$("#modalBody").text(message)
+		  	$("#myModalDialog").modal()
+	  	}
+		
+		function remove(link){
+			url=link.attr("href")
+			$.ajax({
+				type: "DELETE",
+				url: url,
+				beforeSend: function(xhr) {
+				xhr.setRequestHeader (csrfHeaderName, csrfValue)
+				}
+			}).done(function (response) {
+				rowNumber = link.attr("rowNumber")
+				removeBookHTML(rowNumber)
+				updateTotal()
+				alert(response)
+			})
+		}
+		
+		function removeBookHTML(rowNumber){
+			$("#row" + rowNumber).remove()
+		}
+    </script>
+</body>
+</html>

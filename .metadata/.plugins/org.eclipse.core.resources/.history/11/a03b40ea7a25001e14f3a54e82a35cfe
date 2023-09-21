@@ -1,0 +1,66 @@
+package com.edubook.site.book;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
+import com.edubook.common.entity.Book;
+
+@Controller
+public class BookController {
+	
+	@Autowired
+	private BookService service;
+	@Autowired
+	private BookRepository repo;
+
+	@GetMapping("/search")
+	public String searchFirstPage(Model model, @Param("keyword") String keyword) {
+		return searchByPage(keyword, 1, model);
+	}
+	
+	@GetMapping("/search-page-{pageNum}")
+	public String searchByPage(@Param("keyword") String keyword,
+			@PathVariable("pageNum") int pageNum, Model model) {
+		Page<Book> pageBooks = service.search(keyword, pageNum);
+		List<Book> listResult = pageBooks.getContent();
+		
+		long startCount = (pageNum - 1)*BookService.SEARCH_RESULTS_PER_PAGE + 1;
+		long endCount = startCount + BookService.SEARCH_RESULTS_PER_PAGE - 1;
+		if(endCount > pageBooks.getTotalElements()) {
+			endCount = pageBooks.getTotalElements();
+		}
+		
+		model.addAttribute("currentPage", pageNum);
+		model.addAttribute("totalPages", pageBooks.getTotalPages());
+		model.addAttribute("startCount", startCount);
+		model.addAttribute("endCount", endCount);
+		model.addAttribute("totalItems", pageBooks.getTotalElements());
+		model.addAttribute("keyword", keyword);
+		model.addAttribute("listResult", listResult);
+		return "book/search_result";
+	}
+	
+	@GetMapping("/book-detail-{IDsach}")
+	public String viewBookDetail(@PathVariable(name = "IDsach") Integer IDsach, Model model) throws BookNotFoundException {
+		try {
+			Book book = service.get(IDsach);
+			model.addAttribute("book", book);
+			String theloai = book.getTheloai();
+			Pageable pageable = PageRequest.of(0, 8);
+	        List<Book> listBooks = repo.findByTheloaiAndIDsachNot(null, IDsach, pageable);
+	        model.addAttribute("listBooks", listBooks);
+			return "book/book_detail";
+		}catch(BookNotFoundException ex) {
+			return "redirect:book/search_result";
+		}
+	}
+}

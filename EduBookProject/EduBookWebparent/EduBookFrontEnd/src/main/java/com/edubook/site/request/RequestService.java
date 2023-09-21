@@ -1,0 +1,59 @@
+package com.edubook.site.request;
+
+import java.util.Date;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import com.edubook.common.entity.Account;
+import com.edubook.common.entity.OrderStatus;
+import com.edubook.common.entity.Request;
+import com.edubook.common.entity.RequestStatus;
+import com.edubook.site.order.OrderRepository;
+
+@Service
+public class RequestService {
+	public static final int REQUEST_PER_PAGE = 5;
+	
+	@Autowired
+	private RequestRepository repo;
+	@Autowired
+	private OrderRepository orderRepo;
+	
+	public Page<Request> listByPage(int pageNum, String keyword, Account account){
+		Pageable pageable = PageRequest.of(pageNum - 1, REQUEST_PER_PAGE);
+		if(keyword != null) {
+			return repo.findByCustomer(account.getIDtaikhoan(),keyword, pageable);
+		}
+		return repo.findByCustomer(account.getIDtaikhoan(), pageable);
+	}
+	
+	public Request getByCustomerAndId(Account account, Integer IDrequest) throws RequestNotFoundException {
+		Request request = repo.findByCustomerAndIDrequest(account.getIDtaikhoan(), IDrequest);
+		if (request == null) 
+			throw new RequestNotFoundException("Bạn không có yêu cầu nào với ID " + IDrequest);
+		
+		return request;
+	}
+	
+	public boolean didCustomerRequest(Account account, Integer IDorder) {
+		Long count = repo.countByCustomerAndOrder(account.getIDtaikhoan(), IDorder);
+		return count > 0;
+	}
+	
+	public boolean canCustomerRequest(Account account, Integer IDorder) {
+		Long count = orderRepo.countByOrderAndAccountAndOrderStatus(IDorder, account.getIDtaikhoan(), OrderStatus.DELIVERED);
+		return count > 0;
+	}
+	
+	public Request save(Request request) {
+		request.setRequestTime(new Date());
+		request.setRequestStatus(RequestStatus.PROCESSING);
+		Request savedRequest = repo.save(request);
+		return savedRequest;
+	}
+	
+}

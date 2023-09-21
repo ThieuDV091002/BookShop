@@ -1,0 +1,28 @@
+package com.edubook.site.book;
+
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.PagingAndSortingRepository;
+
+import com.edubook.common.entity.Book;
+
+public interface BookRepository extends PagingAndSortingRepository<Book, Integer>{
+
+	@Query(value = "SELECT * FROM sach s WHERE MATCH(tensach, theloai, tacgia, nxb) AGAINST(?1)", nativeQuery = true)
+	public Page<Book> search(String keyword, Pageable pageable);
+	
+	@Query("UPDATE Book b SET b.averageRating = COALESCE((SELECT AVG(r.rating) FROM Review r WHERE r.book.IDsach = ?1), 0),"
+			+"b.reviewCount = (SELECT COUNT(r.IDreview) FROM Review r WHERE r.book.IDsach =?1)"
+			+ "WHERE b.IDsach = ?1")
+	@Modifying
+	public void updateReviewCountAndAverageRating(Integer IDsach);
+	
+	public List<Book> findTop6ByOrderByAverageRatingDesc(Pageable pageable);
+	
+	public List<Book> findByTheloaiAndIDsachNot(String theloai, Integer IDsach, Pageable pageable);
+	
+}

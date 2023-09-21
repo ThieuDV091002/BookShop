@@ -1,0 +1,5 @@
+package com.edubook.admin.review;
+
+public class ReviewService {
+
+}

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+
+<html xmlns:th="www.thymeleaf.org"
+	xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport"
+	content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+
+<title>EduBook | Cập nhật thông tin sách</title>
+
+<meta name="description" content="" />
+
+<link rel="stylesheet"
+	th:href="@{https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css}">
+
+<link rel="preconnect" th:href="@{https://fonts.googleapis.com}" />
+<link rel="preconnect" th:href="@{https://fonts.gstatic.com}"
+	crossorigin />
+<link
+	th:href="@{https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap}"
+	rel="stylesheet" />
+
+<link rel="stylesheet" th:href="@{css/boxicons.css}" />
+
+<link rel="stylesheet" th:href="@{css/core.css}"
+	class="template-customizer-core-css" />
+<link rel="stylesheet" th:href="@{css/theme-default.css}"
+	class="template-customizer-theme-css" />
+<link rel="stylesheet" th:href="@{css/demo.css}" />
+
+<link rel="stylesheet" th:href="@{css/perfect-scrollbar.css}" />
+
+<script th:src="@{js/helpers.js}"></script>
+
+<script th:src="@{js/config.js}"></script>
+</head>
+
+<body>
+	<!-- Layout wrapper -->
+	<div class="layout-wrapper layout-content-navbar">
+		<div class="layout-container">
+			<!-- Menu -->
+
+			<aside id="layout-menu"
+				class="layout-menu menu-vertical menu bg-menu-theme">
+				<div class="app-brand demo">
+					<a href="" class="app-brand-link"> <span
+						class="app-brand-text demo menu-text fw-bolder ms-2"
+						style="color: #696cff; text-decoration: none">EduBook</span>
+					</a>
+				</div>
+
+				<ul class="menu-inner py-1">
+					<li class="menu-item"><a
+						th:href="@{/account-update}" class="menu-link">
+							<div>Thông tin tài khoản</div>
+					</a></li>
+					<li class="menu-item" sec:authorize="hasAuthority('Quản trị viên')"><a th:href="@{/account}"
+						class="menu-link">
+							<div>Quản lý tài khoản</div>
+					</a></li>
+					<li class="menu-item" sec:authorize="hasAuthority('Người quản lý')"><a th:href="@{/book}" class="menu-link">
+							<div>Quản lý sách</div>
+					</a></li>
+					<li class="menu-item" sec:authorize="hasAuthority('Người quản lý')"><a th:href="@{/review}" class="menu-link">
+							<div>Đánh giá</div>
+					</a></li>
+					<li class="menu-item" sec:authorize="hasAnyAuthority('Người quản lý','Người vận chuyển')"><a th:href="@{/order}" class="menu-link">
+							<div>Quản lý đơn hàng</div>
+					</a></li>
+					<li class="menu-item" sec:authorize="hasAuthority('Người quản lý')"><a th:href="@{/request}" class="menu-link">
+							<div>Quản lý khiếu nại</div>
+					</a></li>
+				</ul>
+			</aside>
+
+			<!-- Layout container -->
+			<div class="layout-page">
+				<!-- Navbar -->
+				<form th:action="@{/logout}" method="post" th:hidden="true"
+					name="LogoutForm">
+					<input type="submit">
+				</form>
+
+				<nav
+					class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"
+					id="layout-navbar">
+					<div class="navbar-nav-right d-flex align-items-center"
+						id="navbar-collapse">
+						<!-- Search -->
+						<div class="navbar-nav align-items-center">
+							<div class="nav-item d-flex align-items-center"><input type="text"
+									class="form-control border-0 shadow-none"
+									placeholder="Tìm Kiếm..." aria-label="Search..." />
+							</div>
+						</div>
+						<!-- /Search -->
+
+						<ul class="navbar-nav flex-row align-items-center ms-auto">
+							<li class="nav-item navbar-dropdown dropdown-user dropdown">
+								<a class="nav-link dropdown-toggle hide-arrow"
+								href="javascript:void(0);" data-bs-toggle="dropdown">
+									<div class="avatar avatar-online">
+										<img th:src="@{/image/1.jpeg}" alt
+											class="w-px-40 h-auto rounded-circle" />
+									</div>
+							</a>
+								<ul class="dropdown-menu dropdown-menu-end">
+									<li><a class="dropdown-item" th:href="@{/account-update}">
+											<div class="d-flex">
+												<div class="flex-shrink-0 me-3">
+													<div class="avatar avatar-online">
+														<img th:src="@{/image/1.jpeg}" alt
+															class="w-px-40 h-auto rounded-circle" />
+													</div>
+												</div>
+												<div class="flex-grow-1">
+													<span class="fw-semibold d-block"
+														sec:authentication="principal.hoten"></span> <small
+														class="text-muted" sec:authentication="principal.vaitro"></small>
+												</div>
+											</div>
+									</a></li>
+									<li>
+										<div class="dropdown-divider"></div>
+									</li>
+									<li><a class="dropdown-item" href=""> <a
+											class="align-middle" id="logoutLink" href="">Đăng xuất</a>
+									</a></li>
+								</ul>
+							</li>
+							<!--/ User -->
+						</ul>
+					</div>
+				</nav>
+
+				<!-- / Navbar -->
+
+				<!-- Content wrapper -->
+				<div class="content-wrapper">
+					<!-- Content -->
+
+					<div class="container-xxl flex-grow-1 container-p-y">
+						<h4 class="fw-bold py-3 mb-4">
+							<span class="text-muted fw-light">Quản lý sách /</span>
+							[[${pageTitle}]]
+						</h4>
+
+						<div class="row">
+							<div class="col-md-12">
+								<div class="card mb-4">
+									<h5 class="card-header">Thông tin sách</h5>
+									<hr class="my-0" />
+									<div class="card-body">
+										<form th:action="@{book-update}" method="post"
+											th:object="${book}" enctype="multipart/form-data"
+											onsubmit="return checkTensachUnique(this)">
+											<div class="row">
+												<div class="mb-3 col-md-6 d-none">
+													<label class="form-label">IDsach</label> <input
+														class="form-control" type="text" th:field="*{IDsach}"
+														maxlength="128" th:value="${book.IDsach}" />
+												</div>
+												<div class="mb-3 col-md-6">
+													<label class="form-label">Tên sách</label> <input
+														class="form-control" type="text" th:field="*{tensach}"
+														maxlength="128" required />
+												</div>
+												<div class="mb-3 col-md-6">
+													<label class="form-label">Tác giả</label> <input
+														class="form-control" type="text" th:field="*{tacgia}"
+														maxlength="128" required />
+												</div>
+												<div class="mb-3 col-md-6">
+													<label class="form-label">Năm xuất bản</label> <input
+														class="form-control" type="number"
+														th:field="*{namxuatban}" required />
+												</div>
+												<div class="mb-3 col-md-6">
+													<label class="form-label">Nhà xuất bản</label> <input
+														type="text" class="form-control" th:field="*{nxb}"
+														maxlength="128" required />
+												</div>
+												<div class="mb-3 col-md-6">
+													<label class="form-label">Mô tả</label> <input type="text"
+														class="form-control" th:field="*{mota}" maxlength="5120"
+														required />
+												</div>
+												<div class="mb-3 col-md-6">
+													<label class="form-label">Số lượng kho</label> <input
+														type="number" class="form-control"
+														th:field="*{soluongkho}" required />
+												</div>
+												<div class="mb-3 col-md-6">
+													<label class="form-label">Đơn giá</label> <input
+														class="form-control" type="number" th:field="*{dongia}"
+														required />
+												</div>
+												<div class="mb-3 col-md-6">
+													<label class="form-label">Thể loại</label> <select
+														id="role" class="select2 form-select"
+														th:field="*{theloai}">
+														<option value="" disabled>Lựa chọn thể loại</option>
+														<option value="Sách giáo khoa">Sách giáo khoa</option>
+														<option value="Kỹ năng sống">Kỹ năng sống</option>
+														<option value="Văn học">Văn học</option>
+													</select>
+												</div>
+												<div class="mb-3 col-md-6">
+													<label class="form-label">Hình ảnh</label> <input
+														type="hidden" th:field="*{hinhanh}"> <input
+														class="form-control" type="file" id="fileImage"
+														name="image" accept="image/png, image/jpeg, image/jpg" />
+													<img id="thumbnail" alt="Book image" class="img-fluid"
+														th:src="@{${book.bookPhotoPath}}"
+														style="width: 150px; height: 150px">
+												</div>
+											</div>
+											<div class="mt-2">
+												<button type="submit" class="btn btn-primary me-2">Save</button>
+												<button type="button" id="buttonCancel"
+													class="btn btn-outline-secondary">Cancel</button>
+											</div>
+										</form>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script th:src="@{js/jquery.js}"></script>
+	<script th:src="@{js/popper.js}"></script>
+	<script th:src="@{js/bootstrap.js}"></script>
+	<script th:src="@{js/perfect-scrollbar.js}"></script>
+
+	<script th:src="@{js/menu.js}"></script>
+
+	<script th:src="@{js/main.js}"></script>
+
+	<script th:src="@{/js/pages-account-settings-account.js}"></script>
+
+	<script async defer th:src="@{https://buttons.github.io/buttons.js}"></script>
+
+	<script type="text/javascript">
+		$(document).ready(function() {
+	        $("#logoutLink").on("click", function(e) {
+	            e.preventDefault();
+	            $("form[name='LogoutForm']").submit();
+	        });
+	    });
+	
+	  $(document).ready(function(){
+		  $("#buttonCancel").on("click", function(){
+			  window.location = "[[@{/book}]]"
+		  })
+		  
+		  $("#fileImage").change(function(){
+			  fileSize = this.files[0].size
+			  if(fileSize > 1048576){
+				  this.setCustomVlidity("Bạn cần chọn một bức ảnh có kích thước nhỏ hơn 1MB!")
+				  this.reportValidity()
+			  }
+			  else{
+				  this.setCustomValidity("")
+				  showImageThumbnail(this)
+			  }
+		  })
+	  })
+	  
+	  function showImageThumbnail(fileInput){
+		  var file = fileInput.files[0]
+		  var reader = new FileReader()
+		  reader.onload = function(e){
+			  $("#thumbnail").attr("src", e.target.result)
+		  }
+		  reader.readAsDataURL(file)
+	  }
+	  
+	  function checkTensachUnique(form){
+		  url = "[[@{/book-check_tensach}]]"
+		  bookTensach = $("#tensach").val()
+		  csrfValue = $("input[name='_csrf']").val()
+		  params = {tensach: bookTensach, _csrf: csrfValue}
+		  $.post(url, params, function(response){
+			  if(response == "OK"){
+				  form.submit()
+			  }
+			  else if(response == "Duplicated"){
+				  alert("Có một cuốn sách khác cùng tên này: " + bookTensach)
+			  }  
+		  })
+		  return false
+	  }
+  </script>
+</body>
+</html>

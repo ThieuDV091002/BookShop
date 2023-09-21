@@ -1,0 +1,56 @@
+package com.edubook.site.order;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
+import com.edubook.common.entity.Account;
+import com.edubook.site.customer.CustomerNotFoundException;
+import com.edubook.site.customer.CustomerService;
+
+public class OrderRestController {
+
+	@Autowired private OrderService orderService;
+	@Autowired private CustomerService customerService;
+	
+	@PostMapping("/order-cancel")
+	public ResponseEntity<?> handleOrderCancelRequest(@RequestBody OrderCancelRequest cancelRequest,
+			HttpServletRequest servletRequest) {
+		
+		System.out.println("Order ID: " + cancelRequest.getIDorder());
+		System.out.println("Reason: " + cancelRequest.getReason());
+		System.out.println("Note: " + cancelRequest.getNote());
+		
+		Account account = null;
+		account = getAuthenticatedAccount(servletRequest);
+		
+		try {
+			orderService.setOrderCancelRequest(cancelRequest, account);
+		} catch (OrderNotFoundException ex) {
+			return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+		}
+		
+		return new ResponseEntity<>(new OrderCancelResponse(cancelRequest.getIDorder()), HttpStatus.OK);
+	}
+	
+	private Account getAuthenticatedAccount(HttpServletRequest request) {
+		String customerName = getUsernameOfAuthenticatedCustomer(request);
+		Account account = customerService.getAccountByUsername(customerName);
+		String customerEmail = account.getEmail();
+		return customerService.getAccountByEmail(customerEmail);
+	}
+	
+	public static String getUsernameOfAuthenticatedCustomer(HttpServletRequest request) {
+	    Object principal = request.getUserPrincipal();
+	    String customerName = null;
+	    if (principal instanceof UsernamePasswordAuthenticationToken) {
+	        customerName = request.getUserPrincipal().getName();
+	    }
+	    return customerName;
+	}
+}

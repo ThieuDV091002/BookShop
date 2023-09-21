@@ -1,0 +1,135 @@
+package com.edubook.common.entity;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.OrderBy;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
+@Entity
+@Table(name="request")
+public class Request {
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Integer IDrequest;
+	
+	private String reason; 
+	private String photos;
+	private String notes;
+	private Date requestTime;
+	
+	@Enumerated(EnumType.STRING)
+	private RequestStatus requestStatus;
+	
+	@OneToOne
+	@JoinColumn(name = "IDorder")
+	private Order order;;
+	
+	@ManyToOne
+	@JoinColumn(name = "IDtaikhoan")
+	private Account account;
+	
+	@OneToMany(mappedBy = "request", cascade = CascadeType.ALL)
+	@OrderBy("updatedTime ASC")
+	private List<RequestTrack> requestTracks = new ArrayList<>();
+
+	public Integer getIDrequest() {
+		return IDrequest;
+	}
+
+	public void setIDrequest(Integer iDrequest) {
+		IDrequest = iDrequest;
+	}
+
+	public String getReason() {
+		return reason;
+	}
+
+	public void setReason(String reason) {
+		this.reason = reason;
+	}
+
+	public String getPhotos() {
+		return photos;
+	}
+
+	public void setPhotos(String photos) {
+		this.photos = photos;
+	}
+
+	public String getNotes() {
+		return notes;
+	}
+
+	public void setNotes(String notes) {
+		this.notes = notes;
+	}
+
+	public RequestStatus getRequestStatus() {
+		return requestStatus;
+	}
+
+	public void setRequestStatus(RequestStatus requestStatus) {
+		this.requestStatus = requestStatus;
+	}
+
+	public Order getOrder() {
+		return order;
+	}
+
+	public void setOrder(Order order) {
+		this.order = order;
+	}
+
+	public Account getAccount() {
+		return account;
+	}
+
+	public void setAccount(Account account) {
+		this.account = account;
+	}
+	
+	public Date getRequestTime() {
+		return requestTime;
+	}
+
+	public void setRequestTime(Date requestTime) {
+		this.requestTime = requestTime;
+	}
+	
+	public List<RequestTrack> getRequestTracks() {
+		return requestTracks;
+	}
+
+	public void setRequestTracks(List<RequestTrack> requestTracks) {
+		this.requestTracks = requestTracks;
+	}
+
+	public boolean hasStatus(RequestStatus status) {
+		for(RequestTrack oTrack : requestTracks) {
+			if(oTrack.getStatus().equals(status))
+				return true;
+		}
+		return false;
+	}
+
+	@Transient
+	public String getRequestPhotoPath() {
+		return "/request-photos/" + this.IDrequest + "/" + this.photos;
+	}
+	
+}

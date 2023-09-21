@@ -1,0 +1,66 @@
+package com.edubook.admin.account;
+
+import java.util.NoSuchElementException;
+
+import javax.transaction.Transactional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import com.edubook.common.entity.Account;
+
+
+@Service
+@Transactional
+public class AccountService {
+	public static final int ACCOUNT_PER_PAGE = 5;
+	@Autowired
+	private AccountRepository repo;
+	
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+	
+	public Page<Account> listByPage(int pageNum, String keyword){
+		Pageable pageable = PageRequest.of(pageNum - 1, ACCOUNT_PER_PAGE);
+		if(keyword != null) {
+			return repo.findAll(keyword, pageable);
+		}
+		return repo.findAll(pageable);
+	}
+	
+	public void save(Account account) {
+		encodePassword(account);
+		repo.save(account);	
+	}
+	
+	public void encodePassword(Account account) {
+		String encodedPassword = passwordEncoder.encode(account.getMatkhau());
+		account.setMatkhau(encodedPassword);
+	}
+
+	public boolean isEmailUnique(String email) {
+		Account accountByEmail = repo.getAccountByEmail(email);
+		return accountByEmail == null;
+	}
+
+	public Account get(Integer IDtaikhoan) throws AccountNotFoundException {
+		try {
+			return repo.findById(IDtaikhoan).get();
+		} catch (NoSuchElementException ex) {
+			throw new AccountNotFoundException("Không tìm thấy tài khoản có ID: " + IDtaikhoan);
+		}
+	}
+
+	public void updateAccountStatus(Integer IDtaikhoan, boolean trangthai) {
+		repo.updateAccountStatus(IDtaikhoan, trangthai);
+	}
+	
+	public Account getByEmail(String email) {
+		return repo.getAccountByEmail(email);
+	}
+
+}

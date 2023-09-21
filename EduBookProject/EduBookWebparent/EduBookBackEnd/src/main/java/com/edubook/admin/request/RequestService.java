@@ -1,0 +1,57 @@
+package com.edubook.admin.request;
+
+import java.util.Date;
+import java.util.List;
+import java.util.NoSuchElementException;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import com.edubook.common.entity.Request;
+import com.edubook.common.entity.RequestStatus;
+import com.edubook.common.entity.RequestTrack;
+
+@Service
+public class RequestService {
+	public static final int REQUEST_PER_PAGE=10;
+
+	@Autowired
+	private RequestRepository repo;
+	
+	public Page<Request> listRequestByPage(int pageNum, String keyword){
+		Pageable pageable = PageRequest.of(pageNum - 1, REQUEST_PER_PAGE);
+		if(keyword != null) {
+			return repo.findAll(keyword, pageable);
+		}
+		return repo.findAll(pageable);
+	}
+	
+	public Request getRequest(Integer IDrequest) throws RequestNotFoundException {
+		try {
+			return repo.findById(IDrequest).get();
+		}catch(NoSuchElementException ex){
+			throw new RequestNotFoundException("Không tìm thấy tài khoản có ID: " + IDrequest);
+		}
+	}
+	
+	public void updateStatus(Integer IDrequest, String status) {
+		Request requestInDB = repo.findById(IDrequest).get();
+		RequestStatus statusToUpdate = RequestStatus.valueOf(status);
+		if(!requestInDB.hasStatus(statusToUpdate)) {
+			List<RequestTrack> requestTracks = requestInDB.getRequestTracks();
+			RequestTrack track = new RequestTrack();
+			
+			track.setRequest(requestInDB);
+			track.setUpdatedTime(new Date());
+			track.setStatus(statusToUpdate);
+			track.setNotes(statusToUpdate.defaultDescription());
+			
+			requestTracks.add(track);
+			requestInDB.setRequestStatus(statusToUpdate);
+			repo.save(requestInDB);
+		}
+	}
+}

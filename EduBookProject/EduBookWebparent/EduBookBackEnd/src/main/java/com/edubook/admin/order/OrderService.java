@@ -1,0 +1,94 @@
+package com.edubook.admin.order;
+
+import java.util.Date;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Set;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import com.edubook.admin.book.BookService;
+import com.edubook.common.entity.Book;
+import com.edubook.common.entity.Order;
+import com.edubook.common.entity.OrderDetail;
+import com.edubook.common.entity.OrderStatus;
+import com.edubook.common.entity.OrderTrack;
+
+
+@Service
+public class OrderService {
+
+	public static final int ORDER_PER_PAGE = 10;
+	
+	@Autowired
+	private OrderRepository repo;
+	
+	@Autowired
+	private BookService bookservice;
+	
+	public Page<Order> listByPage(int pageNum, String keyword){
+		Pageable pageable = PageRequest.of(pageNum - 1, ORDER_PER_PAGE);
+		if(keyword != null) {
+			return repo.findAll(keyword, pageable);
+		}
+		return repo.findAll(pageable);
+	}
+
+	public Order get(Integer IDorder) throws OrderNotFoundException {
+		try {
+			return repo.findById(IDorder).get();
+		} catch (NoSuchElementException ex) {
+			throw new OrderNotFoundException("Không tìm thấy tài khoản có ID: " + IDorder);
+		}
+	}
+
+	public void save(Order orderInForm) {
+		Order orderInDB = repo.findById(orderInForm.getIDorder()).get();
+		orderInDB.setOrderTime(orderInDB.getOrderTime());
+		orderInDB.setAccount(orderInDB.getAccount());
+		repo.save(orderInDB);
+	}
+	
+	public void updateStatus(Integer IDorder, String status, String username) {
+		Order orderInDB = repo.findById(IDorder).get();
+		OrderStatus statusToUpdate = OrderStatus.valueOf(status);
+		
+		if (!orderInDB.hasStatus(statusToUpdate)) {
+			List<OrderTrack> orderTracks = orderInDB.getOrderTracks();
+			
+			OrderTrack track = new OrderTrack();
+			if(statusToUpdate.equals(OrderStatus.PICKED)) {
+				track.setShipper(username);
+			}
+			if(statusToUpdate.equals(OrderStatus.CANCELLED)) {
+				orderInDB.setLydohuy(statusToUpdate.defaultDescription());
+			}
+			if(statusToUpdate.equals(OrderStatus.DELIVERED)) {
+				Set<OrderDetail> orderDetails = orderInDB.getOrderDetails();
+				for(OrderDetail detail : orderDetails) {
+					Book book = detail.getBook();
+					int quantity = detail.getQuantity();
+					
+					book.setSoluongkho(book.getSoluongkho() - quantity);
+					book.setSoluongban(book.getSoluongban() + quantity);
+					
+					bookservice.update(book);
+				}
+			}
+			track.setOrder(orderInDB);
+			track.setStatus(statusToUpdate);
+			track.setUpdatedTime(new Date());
+			track.setNotes(statusToUpdate.defaultDescription());
+			
+			orderTracks.add(track);
+			
+			orderInDB.setOrderStatus(statusToUpdate);
+			
+			repo.save(orderInDB);
+		}	
+	}
+}

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename type &apos;com.edubook.common.entity.OrderTracking&apos; to &apos;OrderTrack&apos;&#x0D;&#x0A;- Original project: &apos;EduBookCommon&apos;&#x0D;&#x0A;- Original element: &apos;com.edubook.common.entity.OrderTracking&apos;&#x0D;&#x0A;- Renamed element: &apos;com.edubook.common.entity.OrderTrack&apos;&#x0D;&#x0A;- Update references to refactored element&#x0D;&#x0A;- Update textual occurrences in comments and strings" description="Rename type &apos;OrderTracking&apos;" flags="589830" id="org.eclipse.jdt.ui.rename.type" input="/src\/main\/java=/optional=/true=/=/maven.pomderived=/true=/&lt;com.edubook.common.entity{OrderTracking.java[OrderTracking" matchStrategy="1" name="OrderTrack" qualified="false" references="true" similarDeclarations="false" stamp="1688568458682" textual="false" version="1.0"/>
+</session>

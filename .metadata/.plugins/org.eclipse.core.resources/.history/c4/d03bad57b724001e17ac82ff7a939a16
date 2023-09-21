@@ -1,0 +1,5 @@
+package com.edubook.admin.book;
+
+public class BookRestController {
+
+}

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html xmlns:th="www.thymeleaf.org"
+	xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trang chủ - EduBook</title>
+<script th:src="@{js/jquery-3.3.1.js}"></script>
+<script th:src="@{js/bootstrap.min.js}"></script>
+<link th:href="@{/rating-star/css/star-rating.css}" media="all" rel="stylesheet" type="text/css" />
+<script th:src="@{/rating-star/js/star-rating.js}" type="text/javascript"></script>
+<link th:href="@{/rating-star/themes/krajee-svg/theme.css}" media="all" rel="stylesheet" type="text/css" />
+<script th:src="@{/rating-star/themes/krajee-svg/theme.js}"></script>
+<link rel="stylesheet" th:href="@{css/bootstrap.min.css}">
+<link
+	th:href="@{https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500&display=swap}"
+	rel="stylesheet">
+<link rel="stylesheet" th:href="@{fontawesome/all.min.css}">
+<link
+	th:href="@{https://fonts.googleapis.com/css2?family=Paytone+One&display=swap}"
+	rel="stylesheet">
+<link rel="stylesheet" th:href="@{css/style.css}">
+<link rel="stylesheet" th:href="@{css/product.css}">
+</head>
+
+<body>
+	<div class="app">
+		<header id="header">
+			<div class="header__top">
+				<div class="container">
+					<section class="row flex">
+						<div class="col-lg-5 col-md-0 col-sm-0 heade__top-left">
+							<span>EduBook - Cội nguồn của tri thức</span>
+						</div>
+
+						<nav class="col-lg-7 col-md-0 col-sm-0 header__top-right">
+							<ul class="header__top-list">
+								<li class="header__top-item"><a href="#"
+									class="header__top-link">Đăng ký</a></li>
+								<li class="header__top-item"><a href="#"
+									class="header__top-link">Đăng nhập</a></li>
+							</ul>
+						</nav>
+					</section>
+				</div>
+			</div>
+
+			<div class="header__bottom">
+				<div class="container">
+					<section class="row">
+						<div class="col-lg-3 col-md-4 col-sm-12 header__logo">
+							<h1 class="header__heading">
+								<a href="#" class="header__logo-link"> <img
+									th:src="@{image/logo1.png}" alt="Logo" class="header__logo-img">
+								</a>
+							</h1>
+						</div>
+
+						<div class="col-lg-6 col-md-7 col-sm-0 header__search text-center"
+							style="display: flex; justify-content: center; align-items: center;">
+							<form class="col-lg-12 col-md-7 col-sm-0 header__search"
+								th:action="@{/search}">
+								<input type="search" name="keyword" class="header__search-input"
+									th:value="${keyword}" placeholder="Tìm kiếm...">
+							</form>
+						</div>
+
+						<div class="col-lg-2 col-md-0 col-sm-0 header__call">
+							<div class="header__call-icon-wrap">
+								<i class="fas fa-phone-alt header__call-icon"></i>
+							</div>
+							<div class="header__call-info">
+								<div class="header__call-text">Gọi điện tư vấn</div>
+								<div class="header__call-number">0312 456 789</div>
+							</div>
+						</div>
+
+						<a href="cart.html"
+							class="col-lg-1 col-md-1 col-sm-0 header__cart">
+							<div class="header__cart-icon-wrap">
+								<span class="header__notice">0</span> <i
+									class="fas fa-shopping-cart header__nav-cart-icon"></i>
+							</div>
+						</a>
+					</section>
+				</div>
+			</div>
+
+			<div class="header__nav"></div>
+		</header>
+
+		<section class="product">
+			<div class="container">
+				<div class="row bg-white pt-4 pb-4 border-bt pc">
+					<article class="product__main col-lg-9 col-md-12 col-sm-12">
+						<div class="row">
+							<div class="product__main-img col-lg-4 col-md-4 col-sm-12">
+								<div class="product__main-img-primary">
+									<img th:if="${book.hinhanh == null}"
+										th:src="@{/image/id467907-125.png}" style="height: 95%;">
+									<img th:if="${book.hinhanh != null}"
+										th:src="@{${book.bookPhotoPath}}">
+								</div>
+							</div>
+
+							<div class="product__main-info col-lg-8 col-md-8 col-sm-12">
+								<div class="product__main-info-breadcrumb">Trang chủ / Sản
+									phẩm</div>
+
+								<a href="#" class="product__main-info-title">
+									<h2 class="product__main-info-heading">
+										[[${book.tensach}]]</h2>
+								</a>
+
+								<div class="product__main-info-rate-wrap row ml-1" sec:authorize="isAuthenticated()">
+									<div class="col-xs">
+										<input type="text" class="book-detail-rating-star" dir="ltr" data-size="md"
+											th:value="${book.averageRating}">
+									</div>
+									<div class="col-xs ml-1 mt-4">
+										<span style="font-weight: 400; font-size: 1.8rem">&emsp;[[${book.averageRating}]]/5 ([[${book.reviewCount}]])</span>
+									</div>
+								</div>
+
+								<div class="product__main-info-price">
+									<span class="product__main-info-price-current">
+										[[${book.dongia}]] đ </span>
+								</div>
+
+								<div class="product__main-info-description"></div>
+
+								<div class="product__main-info-cart">
+									<div class="product__main-info-cart-btn-wrap">
+										<button class="product__main-info-cart-btn" id="buttonAddToCart">
+											Thêm vào giỏ hàng
+										</button>
+									</div>
+								</div>
+
+								<div class="product__main-info-contact">
+									<div class="product__main-info-contact-phone-wrap">
+										<div class="product__main-info-contact-phone">
+											<div class="product__main-info-contact-phone-title">
+												Gọi điện tư vấn</div>
+											<div class="product__main-info-contact-phone-number">(
+												0352.860.701)</div>
+										</div>
+
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="row bg-white">
+							<div class="col-12 product__main-tab">
+								<a href="#"
+									class="product__main-tab-link product__main-tab-link--active">
+									Mô tả </a>
+							</div>
+
+							<div class="col-12 product__main-content-wrap">
+								<p>[[${book.mota}]]</p>
+							</div>
+						</div>
+						<div class="modal fade text-center" id="myModalDialog">
+							<div class="modal-dialog">
+								<div class="modal-header">
+									<h4 class="modal-title" id="modalTitle">Cảnh báo</h4>
+									<button type="button" class="close" data-dismiss="modal">&times;</button>
+								</div>
+								<div class="modal-body">
+									<span id="modalBody"></span>
+								</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-danger"
+										data-dismiss="modal">Đóng</button>
+								</div>
+							</div>
+						</div>
+					</article>
+
+					<aside class="product__aside col-lg-3 col-md-0 col-sm-0">
+						<div class="product__aside-top">
+							<div class="product__aside-top-item">
+								<img src="images/shipper.png">
+								<div class="product__aside-top-item-text">
+									<p>Giao hàng nhanh chóng</p>
+									<span> Chỉ trong vòng 24h </span>
+								</div>
+							</div>
+							<div class="product__aside-top-item">
+								<img src="images/brand.png">
+								<div class="product__aside-top-item-text">
+									<p>Sản phẩm chính hãng</p>
+									<span> Sản phẩm nhập khẩu 100% </span>
+								</div>
+							</div>
+							<div class="product__aside-top-item">
+								<img src="images/less.png">
+								<div class="product__aside-top-item-text">
+									<p>Mua hàng tiết kiệm</p>
+									<span> Rẻ hơn từ 10% đến 30% </span>
+								</div>
+							</div>
+						</div>
+
+						<div class="product__aside-bottom">
+							<h3 class="product__aside-heading">Sách cùng thể loại</h3>
+
+							<div class="product__aside-list">
+								<div class="product__aside-item product__aside-item--border" th:each="book : ${listBooks}">
+									<div class="product__aside-img-wrap">
+										<img th:if="${book.hinhanh == null}" th:src="@{/image/id467907-125.png}" class="product__aside-img">
+										<img th:if="${book.hinhanh != null}" th:src="@{${book.bookPhotoPath}}" class="product__aside-img">
+									</div>
+									<div class="product__aside-title">
+										<a href="#" class="product__aside-link">
+											<h4 class="product__aside-link-heading">[[${book.tensach}]]</h4>
+										</a>
+
+										<div class="product__aside-rate-wrap">
+											<input type="text" class="book-detail-rating-star" dir="ltr" data-size="xs"
+											th:value="${book.averageRating}">
+										</div>
+
+										<div class="product__aside-price">
+											<span class="product__aside-price-current">[[${book.dongia}]] đ</span>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</aside>
+				</div>
+			</div>
+		</section>
+
+		<footer>
+			<section class="footer__top">
+				<div class="container">
+					<div class="row">
+						<article class="footer__top-intro col-lg-5 col-md-4 col-sm-6">
+							<h4 class="footer__top-intro-heading">Về chúng tôi</h4>
+							<div class="footer__top-intro-content">
+								Edubook là cửa hàng luôn cung cấp cho các bạn tìm tòi tri thức,
+								đam mê đọc sách trên khắp cả nước.Chúng tôi sẽ liên tục cập nhật
+								những cuốn sách hay nhất, mới nhất, chất lượng nhất giúp người
+								đọc có những cuốn sách hay nhất để đọc! <br> <br> Điện
+								thoại: 0312 456 789 <br> Email: edubook@gmail.com <br>
+								Zalo: 0312 456 789 <br>
+							</div>
+						</article>
+
+						<article class="footer__top-policy col-lg-3 col-md-4 col-sm-6">
+							<h4 class="footer__top-policy-heading">Chính sách mua hàng</h4>
+
+							<ul class="footer__top-policy-list">
+								<li class="footer__top-policy-item"><a href="#"
+									class="footer__top-policy-link">Hình thức đặt hàng</a></li>
+								<li class="footer__top-policy-item"><a href="#"
+									class="footer__top-policy-link">Hình thức thanh toán</a></li>
+								<li class="footer__top-policy-item"><a href="#"
+									class="footer__top-policy-link">Phương thức vận chuyển</a></li>
+								<li class="footer__top-policy-item"><a href="#"
+									class="footer__top-policy-link">Chính sách đổi trả</a></li>
+								<li class="footer__top-policy-item"><a href="#"
+									class="footer__top-policy-link">Hướng dẫn sử dụng</a></li>
+							</ul>
+						</article>
+
+						<article
+							class="footer__top-contact-wrap col-lg-4 col-md-4 col-sm-6">
+							<h4 class="footer__top-contact-heading">Hotline liên hệ</h4>
+
+							<div class="footer__top-contact">
+								<div class="footer__top-contact-icon">
+									<img th:src="@{image/phone_top.png}"
+										class="footer__top-contact-img">
+								</div>
+
+								<div class="footer__top-contact-phone-wrap">
+									<div class="footer__top-contact-phone">0312 456 789</div>
+									<div class="footer__top-contact-des">(Giải đáp thắc mắc
+										24/24)</div>
+								</div>
+							</div>
+
+							<h4 class="footer__top-contact-heading">Kết nối với chúng
+								tôi</h4>
+
+							<div class="footer__top-contact-social">
+								<a href="#" class="footer__top-contact-social-link"> <img
+									th:src="@{image/facebook.png}">
+								</a> <a href="#" class="footer__top-contact-social-link"> <img
+									th:src="@{image/youtube.png}">
+								</a> <a href="#" class="footer__top-contact-social-link"> <img
+									th:src="@{image/tiktok.png}">
+								</a> <a href="#" class="footer__top-contact-social-link"> <img
+									th:src="@{image/zalo.png}">
+								</a>
+							</div>
+						</article>
+					</div>
+				</div>
+			</section>
+		</footer>
+	</div>
+	<script th:src="@{js/jq.js}"></script>
+	<script th:src="@{js/index.js}"></script>
+	<script type="text/javascript">
+		contextPath = "[[@{/}]]"
+		IDsach = "[[${book.IDsach}]]"
+		var csrfHeaderName = "[[${_csrf.headerName}]]"
+		var csrfValue = "[[${_csrf.token}]]"
+		
+		$(document).ready(function(){
+			$("#buttonAddToCart").on("click", function(e){
+				addToCart()
+			})
+		})
+		
+		function addToCart() {
+			url= contextPath + "cart-add-" + IDsach
+			$.ajax({
+				type: "POST",
+				url: url,
+				beforeSend: function(xhr) {
+					xhr.setRequestHeader (csrfHeaderName, csrfValue)
+				}
+			}).done(function (response) {
+			showModalDialog("Shopping Cart", response)
+			})
+		}
+		
+		function showModalDialog(title, message){
+		  	$("#modalTitle").text(title)
+		  	$("#modalBody").text(message)
+		  	$("#myModalDialog").modal()
+	  	}
+	  	
+	  	$(".book-detail-rating-star").rating({
+	  		displayOnly: true,
+	  		hoverOnClear: false,
+	  		showCaption: false,
+	  		theme: 'krajee-svg'
+	  	})
+	</script>
+</body>
+
+</html>

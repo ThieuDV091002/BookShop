@@ -1,0 +1,108 @@
+package com.edubook.site.order;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import com.edubook.common.entity.Account;
+import com.edubook.common.entity.Address;
+import com.edubook.common.entity.Book;
+import com.edubook.common.entity.Order;
+import com.edubook.common.entity.OrderDetail;
+import com.edubook.common.entity.OrderStatus;
+import com.edubook.common.entity.OrderTrack;
+import com.edubook.common.entity.PaymentMethod;
+import com.edubook.common.entity.ShoppingCart;
+import com.edubook.site.checkout.CheckoutInfo;
+
+@Service
+public class OrderService {
+	public static final int ORDER_PER_PAGE = 5;
+
+	@Autowired
+	private OrderRepository repo;
+	
+	public Order createOrder(Account account, Address address, List<ShoppingCart> cartItems, 
+			PaymentMethod paymentMethod, CheckoutInfo checkoutInfo) {
+		Order newOrder = new Order();
+		newOrder.setOrderTime(new Date());
+		newOrder.setOrderStatus(OrderStatus.NEW);
+		newOrder.setAccount(account);
+		newOrder.setSubtotal(checkoutInfo.getBookTotal());
+		newOrder.setTotal(checkoutInfo.getPaymentTotal());
+		newOrder.setPaymentMethod(paymentMethod);
+		newOrder.setDeliverDate(checkoutInfo.getDeliverDate());
+		
+		if(address == null) {
+			newOrder.copyAddressFromAccount();
+		}
+		else {
+			newOrder.copyShippingAddress(address);
+		}
+		
+		Set<OrderDetail> orderDetails = newOrder.getOrderDetails();
+		
+		for(ShoppingCart item : cartItems) {
+			Book book = item.getBook();
+			OrderDetail orderDetail = new OrderDetail();
+			orderDetail.setOrder(newOrder);
+			orderDetail.setBook(book);
+			orderDetail.setQuantity(item.getQuantity());
+			orderDetail.setBookCost(book.getDongia()*item.getQuantity());
+			orderDetail.setUnitPrice(book.getDongia());
+			orderDetail.setSubtotal(item.getSubTotal());
+			
+			orderDetails.add(orderDetail);
+		}
+		
+		return repo.save(newOrder);
+	}
+	
+	public Page<Order> listByPage(int pageNum, String keyword, Account account){
+		Pageable pageable = PageRequest.of(pageNum - 1, ORDER_PER_PAGE);
+		if(keyword != null) {
+			return repo.findAll(keyword, account.getIDtaikhoan(), pageable);
+		}
+		return repo.findAll(account.getIDtaikhoan(), pageable);
+	}
+
+	public Order getOrder(Integer IDorder, Account account) {
+		return repo.findByIDorderAndAccount(IDorder, account);
+	}
+	
+	public void updateStatus(Order orderInForm) {
+		Order orderInDB = repo.findById(orderInForm.getIDorder()).get();
+		
+		if (!orderInDB.hasStatus(OrderStatus.CANCELLED)) {
+			List<OrderTrack> orderTracks = orderInDB.getOrderTracks();
+			
+			OrderTrack track = new OrderTrack();
+			track.setOrder(orderInDB);
+			track.setStatus(OrderStatus.CANCELLED);
+			track.setUpdatedTime(new Date());
+			track.setNotes(OrderStatus.CANCELLED.defaultDescription());
+			
+			orderTracks.add(track);
+			
+			orderInDB.setOrderStatus(OrderStatus.CANCELLED);
+			orderInDB.setIDorder(orderInForm.getIDorder());
+			orderInDB.setDeliverDate(orderInForm.getDeliverDate());
+			orderInDB.setDiachi(orderInForm.getDiachi());
+			orderInDB.setHoten(orderInForm.getHoten());
+			orderInDB.setOrderTime(orderInForm.getOrderTime());
+			orderInDB.setPaymentMethod(orderInForm.getPaymentMethod());
+			orderInDB.setSodienthoai(orderInForm.getSodienthoai());
+			orderInDB.setTotal(orderInForm.getTotal());
+			orderInDB.setAccount(orderInForm.getAccount());
+			orderInDB.setLydohuy(orderInForm.getLydohuy());
+			
+			repo.save(orderInDB);
+		}	
+	}
+}

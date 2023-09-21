@@ -1,0 +1,151 @@
+package com.edubook.site.request;
+
+import java.io.IOException;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.edubook.common.entity.Account;
+import com.edubook.common.entity.Order;
+import com.edubook.common.entity.Request;
+import com.edubook.site.FileUploadUtil;
+import com.edubook.site.customer.CustomerService;
+import com.edubook.site.order.OrderNotFoundException;
+import com.edubook.site.order.OrderService;
+
+@Controller
+public class RequestController {
+
+	@Autowired
+	private RequestService service;
+	
+	@Autowired
+	private CustomerService customerService;
+	
+	@Autowired
+	private OrderService orderService;
+	
+	@GetMapping("/request")
+	public String listFirstPage(Model model, HttpServletRequest request) {
+		return listReviewsByCustomerByPage(model, request, 1, null);
+	}
+	
+	@GetMapping("/request-page-{pageNum}") 
+	public String listReviewsByCustomerByPage(Model model, HttpServletRequest request,
+							@PathVariable(name = "pageNum") int pageNum, String keyword) {
+		Account account = getAuthenticatedAccount(request);
+		Page<Request> page = service.listByPage(pageNum, keyword, account);		
+		List<Request> listReviews = page.getContent();
+		
+		model.addAttribute("totalPages", page.getTotalPages());
+		model.addAttribute("totalItems", page.getTotalElements());
+		model.addAttribute("currentPage", pageNum);
+		model.addAttribute("keyword", keyword);
+		
+		model.addAttribute("listReviews", listReviews);
+
+		long startCount = (pageNum - 1) * RequestService.REQUEST_PER_PAGE + 1;
+		model.addAttribute("startCount", startCount);
+		
+		long endCount = startCount + RequestService.REQUEST_PER_PAGE - 1;
+		if (endCount > page.getTotalElements()) {
+			endCount = page.getTotalElements();
+		}
+		
+		model.addAttribute("endCount", endCount);
+		
+		return "request/request_customer";
+	}
+	
+	@GetMapping("/request-detail-{IDrequest}")
+	public String viewReviewDetails(Model model,
+			@PathVariable(name = "IDrequest") Integer IDrequest, HttpServletRequest httpRequest) throws RequestNotFoundException {
+		Account account = getAuthenticatedAccount(httpRequest);
+		Request request = service.getByCustomerAndId(account, IDrequest);
+		
+		model.addAttribute("request", request);
+		model.addAttribute("account", account);
+		
+		return "order/review_detail";
+	}
+	
+	@GetMapping("/order-request-{IDorder}")
+	public String viewRequestForm(Model model,
+			@PathVariable(name = "IDorder") Integer IDorder, HttpServletRequest httpRequest) {
+		Request request = new Request();
+		Account account = getAuthenticatedAccount(httpRequest);
+		Order order = orderService.getOrder(IDorder, account);
+		boolean customerRequested = service.didCustomerRequest(account, IDorder);
+		
+		if (customerRequested) {
+			model.addAttribute("customerRequested", customerRequested);
+		} else {
+			boolean customerCanRequest = service.canCustomerRequest(account, IDorder);
+			
+			if (customerCanRequest) {
+				model.addAttribute("customerCanRequest", customerCanRequest);				
+			} else {
+				model.addAttribute("NoRequestPermission", true);
+			}
+		}		
+		
+		model.addAttribute("order", order);
+		model.addAttribute("account", account);
+		model.addAttribute("request", request);
+		
+		return "request/request_form";
+	}
+	
+	@PostMapping("/request-save")
+	public String saveReview(Model model, Review review, Integer IDorder, 
+			HttpServletRequest request, @RequestParam("image") MultipartFile multipartFile) throws IOException, OrderNotFoundException {
+		Account account = getAuthenticatedAccount(request);
+		Order order = bookService.get(IDorder);
+		review.setBook(book);
+		review.setAccount(account);
+		
+		if(!multipartFile.isEmpty()) {
+    		String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
+    		review.setPhoto(fileName);
+    		Review savedReview = service.save(review);
+    		model.addAttribute("review", savedReview);
+        	String uploadDir = "review-photos/" + savedReview.getIDreview();
+        	FileUploadUtil.saveFile(uploadDir, fileName, multipartFile);
+    	}
+    	else {
+    		if(review.getPhoto().isEmpty()) review.setPhoto(null);
+    		service.save(review);
+    		model.addAttribute("review", review);
+    	}
+		
+		return "review/review_done";
+	}
+	
+	private Account getAuthenticatedAccount(HttpServletRequest request) {
+		String customerName = getUsernameOfAuthenticatedCustomer(request);
+		Account account = customerService.getAccountByUsername(customerName);
+		String customerEmail = account.getEmail();
+		return customerService.getAccountByEmail(customerEmail);
+	}
+	
+	public static String getUsernameOfAuthenticatedCustomer(HttpServletRequest request) {
+	    Object principal = request.getUserPrincipal();
+	    String customerName = null;
+	    if (principal instanceof UsernamePasswordAuthenticationToken) {
+	        customerName = request.getUserPrincipal().getName();
+	    }
+	    return customerName;
+	}
+}

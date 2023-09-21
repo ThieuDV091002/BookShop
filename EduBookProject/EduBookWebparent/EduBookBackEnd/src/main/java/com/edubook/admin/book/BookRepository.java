@@ -1,0 +1,33 @@
+package com.edubook.admin.book;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import com.edubook.common.entity.Book;
+
+@Repository
+public interface BookRepository extends PagingAndSortingRepository<Book, Integer>{
+
+	public Long countByIDsach(Integer IDsach);
+	
+	@Query("SELECT b FROM Book b WHERE b.tensach LIKE %?1% OR b.IDsach LIKE %?1% OR b.tacgia LIKE %?1%"
+			+ " OR b.nxb LIKE %?1%")
+	public Page<Book> findAll(String keyword, Pageable pageable);
+
+	public void deleteById(Integer iDsach);
+
+	@Query("UPDATE Book b SET b.averageRating = COALESCE((SELECT AVG(r.rating) FROM Review r WHERE r.book.IDsach = ?1), 0),"
+			+"b.reviewCount = (SELECT COUNT(r.IDreview) FROM Review r WHERE r.book.IDsach =?1)"
+			+ "WHERE b.IDsach = ?1")
+	@Modifying
+	public void updateReviewCountAndAverageRating(Integer IDsach);
+	
+	@Query("SELECT b FROM Book b WHERE b.tensach = :tensach")
+	public Book getBookByTensach(@Param("tensach") String tensach);
+	
+}
